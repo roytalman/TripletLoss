@@ -50,12 +50,24 @@ TestLabels         = Labels(RandomIndex( 0.8*TotalPic + 1 : end )) ;
     ,'MiniBatchSize',90,'Shuffle','never','Plots','training-progress','ExecutionEnvironment','cpu');  % CNN trainig option Vary improtant-  "Shuffle" shouled be set to never!
 
 LabelsForNet = zeros(size(PicsTrainTriplet,4),NumFeatures ) ; % this is not needed in triplter since we calculating loss using triplte traning set
+
+%%% training %%%
 Net = trainNetwork( PicsTrainTriplet , LabelsForNet, TriplteLayers  ,options) ;
 
+% prediction for test triplets:
+[SumGood] = TripletResultAnalyze(Net,PicsTestTriplet)
 
-Prediction = predict(Net,PicsTestTriplet);
-Prediction_diff = sum((Prediction(1:3:end,:)-Prediction(3:3:end,:)).^2,2) - sum((Prediction(1:3:end,:)-Prediction(2:3:end,:)).^2,2) ;
-
- hist( Prediction_diff,80) ; title('Diff Distance (Negative - Positive  , random triplets)')
-sum(Prediction_diff>0)./length(Prediction_diff)
+%%% Retrain for Worst training cases %%%
+PredictionTrain     = predict(Net,permute(TrainPic,[1 2 4 3]));
+[ TriplteNewOrder ] = SortForTriplte_WorstDistances(PredictionTrain , TrainLabel) ;
    
+RetrainLabels    = TrainLabel(TriplteNewOrder) ;
+RetrainPictures  = permute(TrainPic(:,:,RetrainLabels),[1 2 4 3]);
+options = trainingOptions('sgdm','MaxEpochs',5, 'InitialLearnRate',0.00001...
+    ,'MiniBatchSize',90,'Shuffle','never','Plots','training-progress','ExecutionEnvironment','cpu');  % CNN trainig option Vary improtant-  "Shuffle" shouled be set to never!
+
+LabelsForNet = zeros(size(RetrainPictures,4),NumFeatures ) ; % this is not needed in triplter since we calculating loss using triplte traning set
+
+%%% training %%%
+Net_Retrain = trainNetwork( PicsTrainTriplet , LabelsForNet, Net.Layers  ,options) ;
+[SumGood] = TripletResultAnalyze(Net_Retrain,PicsTestTriplet)

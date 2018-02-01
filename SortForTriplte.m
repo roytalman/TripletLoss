@@ -1,6 +1,12 @@
  function [ PicsOut , LabelsOut ] = SortForTriplte(Pics , Labels)
      % sort triplet loss data , the data is sorted into triplets: anchor,
      % Positive and negative. Matched labels is sorted aswell
+     
+     % input:  Pics - array of traning pictures
+     %         Labels - Pictures labels
+     % Outputs: PicsOut matrix with trplets of images: Anchor , Positive
+     %         (same user) and Negative (different random user) 
+     %          LabelsOut - Triplte labels
     PicsOut = zeros(size(Pics,1),size(Pics,1),1,size(Pics,3));
      for k = 1:size(Pics,3)
          User                 = Labels(k);
