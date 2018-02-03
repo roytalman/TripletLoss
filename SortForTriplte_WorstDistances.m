@@ -13,7 +13,7 @@ DistMat = zeros( NumSamp , NumSamp , size(PredictionTrain,2));
 for k = 1:size(PredictionTrain,2)
     DistMat(:,:,k)  = PredictionTrain(:,k)-PredictionTrain(:,k)' ;
 end
-Dist = sum(DistMat,3) ;
+Dist = sum(DistMat.^2,3) ;
 NumSubSamp = 1000 ; 
  for k = 1:NumSamp
      User                   = TrainLabel(k);

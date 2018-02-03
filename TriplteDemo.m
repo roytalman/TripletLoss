@@ -1,11 +1,12 @@
 
 %%%  triplte Demo %%%
 
-% Written by roy Talman 2/1/2018 , 
+% Written by Roy Talman 2/1/2018 , 
 % Email adress: roytalman@gmail.com
 % GitHub: https://github.com/roytalman/TripletLoss.git
 % Based on the article "FaceNet: A Unified Embedding for Face Recognition
 % and Clustering"  Google Inc 2015
+% Copyright (c) Roy Talman 2018
 
 % image settings:
 ImageSize       = 64 ; 
@@ -39,9 +40,11 @@ TestLabels         = Labels(RandomIndex( 0.8*TotalPic + 1 : end )) ;
 
  NumFeatures = 16; % featers for saparation, originaly 128 
  TriplteLayers = [imageInputLayer([ImageSize ImageSize 1]);
-       convolution2dLayer([5 5],8,'Padding',[0 0]);
+       convolution2dLayer([5 5],32,'Padding',[0 0]);
        reluLayer();
        maxPooling2dLayer([3 3],'Stride',[3 3],'Padding',[0 0]);
+            convolution2dLayer([3 3],32,'Padding',[0 0]);
+       reluLayer();
        dropoutLayer(0.2)
         fullyConnectedLayer(NumFeatures);
        TriplteLossLayer]
