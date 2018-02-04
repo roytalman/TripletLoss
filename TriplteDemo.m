@@ -24,11 +24,12 @@ for k = 1:10
 end
 
 % train and test set:
-[val RandomIndex ] = sort(rand(1,TotalPic)) ;  % random index
-TrainPic           = Pics(:,:,RandomIndex(1:0.8*TotalPic)) ; % 80% training set 
-TrainLabel         = Labels(RandomIndex(1:0.8*TotalPic)) ;
-TestPic            = Pics(:,:,RandomIndex( 0.8*TotalPic + 1 : end )) ; % 20% testing set 
-TestLabels         = Labels(RandomIndex( 0.8*TotalPic + 1 : end )) ;
+NumTrain = 0.7 ; % 70% data for traning
+% [val RandomIndex ] = sort(rand(1,TotalPic)) ;  % random index
+TrainPic           = Pics(:,:,(1:NumTrain*TotalPic)) ; % 70% training set, Classes 1-7 
+TrainLabel         = Labels((1:NumTrain*TotalPic)) ;
+TestPic            = Pics(:,:,( NumTrain*TotalPic + 1 : end )) ; % 30% testing set , Classes 8-10
+TestLabels         = Labels(( NumTrain*TotalPic + 1 : end )) ;
 
 
 % sort in triplte : 
@@ -45,12 +46,12 @@ TestLabels         = Labels(RandomIndex( 0.8*TotalPic + 1 : end )) ;
        maxPooling2dLayer([3 3],'Stride',[3 3],'Padding',[0 0]);
             convolution2dLayer([3 3],32,'Padding',[0 0]);
        reluLayer();
-       dropoutLayer(0.2)
+        dropoutLayer(0.4)
         fullyConnectedLayer(NumFeatures);
        TriplteLossLayer]
    
- options = trainingOptions('sgdm','MaxEpochs',8, 'InitialLearnRate',0.00001...
-    ,'MiniBatchSize',90,'Shuffle','never','Plots','training-progress','ExecutionEnvironment','cpu');  % CNN trainig option Vary improtant-  "Shuffle" shouled be set to never!
+ options = trainingOptions('sgdm','MaxEpochs',55, 'InitialLearnRate',0.001...
+    ,'MiniBatchSize',300,'Shuffle','never','Plots','training-progress','ExecutionEnvironment','gpu');  % CNN trainig option Vary improtant-  "Shuffle" shouled be set to never!
 
 LabelsForNet = zeros(size(PicsTrainTriplet,4),NumFeatures ) ; % this is not needed in triplter since we calculating loss using triplte traning set
 
@@ -66,11 +67,11 @@ PredictionTrain     = predict(Net,permute(TrainPic,[1 2 4 3]));
    
 RetrainLabels    = TrainLabel(TriplteNewOrder) ;
 RetrainPictures  = permute(TrainPic(:,:,RetrainLabels),[1 2 4 3]);
-options = trainingOptions('sgdm','MaxEpochs',5, 'InitialLearnRate',0.00001...
-    ,'MiniBatchSize',90,'Shuffle','never','Plots','training-progress','ExecutionEnvironment','cpu');  % CNN trainig option Vary improtant-  "Shuffle" shouled be set to never!
+options = trainingOptions('sgdm','MaxEpochs',50, 'InitialLearnRate',0.001...
+    ,'MiniBatchSize',300,'Shuffle','never','Plots','training-progress','ExecutionEnvironment','gpu');  % CNN trainig option Vary improtant-  "Shuffle" shouled be set to never!
 
 LabelsForNet = zeros(size(RetrainPictures,4),NumFeatures ) ; % this is not needed in triplter since we calculating loss using triplte traning set
 
 %%% training %%%
 Net_Retrain = trainNetwork( PicsTrainTriplet , LabelsForNet, Net.Layers  ,options) ;
-[SumGood] = TripletResultAnalyze(Net_Retrain,PicsTestTriplet)
+[SumGood_2] = TripletResultAnalyze(Net_Retrain,PicsTestTriplet)
