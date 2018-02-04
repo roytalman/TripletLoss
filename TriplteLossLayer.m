@@ -52,7 +52,7 @@ classdef TriplteLossLayer < nnet.layer.RegressionLayer
             PosDiff = (squeeze(Anchor_Norm-Pos_Norm).^2);
             NegDiff = (squeeze(Anchor_Norm-Neg_Norm).^2);
             % Layer forward loss function goes here
-            loss =  (median(NegDiff(:)).^2)./( median(PosDiff(:)))  ; % Triplte loss, this may need to be optimized
+            loss =  (median( sum(PosDiff )))./( median(sum(NegDiff))) ; % Triplte loss, this may need to be optimized
         end
         
         function dLdX = backwardLoss(layer, Y, T)
