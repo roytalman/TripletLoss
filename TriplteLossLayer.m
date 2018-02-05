@@ -46,13 +46,13 @@ classdef TriplteLossLayer < nnet.layer.RegressionLayer
             % Normlize to obtain Norm of 1
             Anchor_Norm = bsxfun(@rdivide ,Anchor,sqrt(sum(Anchor.^2))) ;
             Pos_Norm = bsxfun(@rdivide ,Pos,sqrt(sum(Pos.^2))) ;
-            Neg_Norm = bsxfun(@rdivide ,Neg,sqrt(sum(Neg.^2))) ;
-            
+            Neg_Norm = bsxfun(@rdivide ,Neg,sqrt(sum(Neg.^2))) ;            
             % Calculate Positive and negative distance
             PosDiff = (squeeze(Anchor_Norm-Pos_Norm).^2);
             NegDiff = (squeeze(Anchor_Norm-Neg_Norm).^2);
             % Layer forward loss function goes here
-            loss =  (median( sum(PosDiff )))./( median(sum(NegDiff))) ; % Triplte loss, this may need to be optimized
+             loss =  (sum( sum(PosDiff )))./( sum(sum(NegDiff))) ; % Triplte loss, this may need to be optimized
+
         end
         
         function dLdX = backwardLoss(layer, Y, T)
