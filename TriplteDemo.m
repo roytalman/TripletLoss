@@ -49,7 +49,7 @@ end
  NumFeatures = 16; % featers for catgory saparation, originaly 128 
  TriplteLayers = GetLayers(ImageSize,NumFeatures) ; % Net pathology
 
- options = trainingOptions('sgdm','MaxEpochs',15, 'InitialLearnRate',0.001,'Momentum',0.99...
+ options = trainingOptions('sgdm','MaxEpochs',15, 'InitialLearnRate',0.01,'Momentum',0.99...
     ,'MiniBatchSize',300,'Shuffle','never','Plots','training-progress','ExecutionEnvironment','gpu');  % CNN trainig option. Vary improtant-  "Shuffle" shouled be set to 'never'!
 
 LabelsForNet = zeros(size(PicsTrainTriplet,4),NumFeatures ) ; % this is not needed in triplter since we calculating loss using triplte traning set
@@ -66,7 +66,7 @@ PredictionTrain     = predict(Net,permute(TrainPic,[1 2 4 3]));
    
 RetrainLabels    = TrainLabel(TriplteNewOrder) ;
 RetrainPictures  = permute(TrainPic(:,:,RetrainLabels),[1 2 4 3]);
-options = trainingOptions('sgdm','MaxEpochs',60, 'InitialLearnRate',0.001...
+options = trainingOptions('sgdm','MaxEpochs',10, 'InitialLearnRate',0.02...
     ,'MiniBatchSize',300,'Shuffle','never','Plots','training-progress','ExecutionEnvironment','gpu');  % CNN trainig option Vary improtant-  "Shuffle" shouled be set to never!
 
 LabelsForNet = zeros(size(RetrainPictures,4),NumFeatures ) ; % this is not needed in triplter since we calculating loss using triplte traning set
