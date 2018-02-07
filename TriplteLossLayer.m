@@ -48,11 +48,12 @@ classdef TriplteLossLayer < nnet.layer.RegressionLayer
             Pos_Norm = bsxfun(@rdivide ,Pos,sqrt(sum(Pos.^2))) ;
             Neg_Norm = bsxfun(@rdivide ,Neg,sqrt(sum(Neg.^2))) ;            
             % Calculate Positive and negative distance
-            PosDiff = (squeeze(Anchor_Norm-Pos_Norm).^2);
-            NegDiff = (squeeze(Anchor_Norm-Neg_Norm).^2);
+            PosDiff = sqrt(sum(squeeze(Anchor_Norm-Pos_Norm).^2));
+            NegDiff = sqrt(sum(squeeze(Anchor_Norm-Neg_Norm).^2));
             % Layer forward loss function goes here
-             loss =  (sum( sum(PosDiff )))./( sum(sum(NegDiff))) ; % Triplte loss, this may need to be optimized
-
+            loss = 0.2 -   median( NegDiff )+( median( PosDiff )  ) ;
+%              disp(['pos dist: ' num2str(median( PosDiff  )) ' ,  Neg dist: ' num2str(median(NegDiff)) ' ,  Diff: ' num2str(median(NegDiff)-median(PosDiff))])
+            loss = max(0,loss);
         end
         
         function dLdX = backwardLoss(layer, Y, T)
@@ -74,15 +75,18 @@ classdef TriplteLossLayer < nnet.layer.RegressionLayer
             
             % Chack if positive distanse bigger then negative to set
             % grdient decsent direction
-            DiffTriplte =  sign( abs(Anchor-Neg)-abs(Anchor-Pos));
+            DiffTriplte1 =  sign( Neg - Pos );
+            DiffTriplte2 =  sign( Pos - Anchor );
+            DiffTriplte3 =  sign( Neg - Anchor );
             
+            DiffTriplte = gpuArray(zeros(size(DiffTriplte1).*([1 1 1 3])));
              % Duplicate three times direction
-            Index = repmat(1:size(Anchor,4),3,1) ;
-            Index = Index(:);
+            DiffTriplte(:,:,:,1:size(DiffTriplte1,4)) = DiffTriplte1 ;
+            DiffTriplte(:,:,:,(1:size(DiffTriplte1,4)) + size(DiffTriplte1,4)) = DiffTriplte2 ;
+            DiffTriplte(:,:,:,(1:size(DiffTriplte1,4)) + 2*size(DiffTriplte1,4)) = DiffTriplte3 ;
             
             % Set Gradient
-            dLdX = DiffTriplte(:,:,:,Index)/N;
-%              dLdX(:,:,:,1:3:end) = 0 ;
+            dLdX = DiffTriplte/(N^2);
             % Layer backward loss function goes here
         end
     end
